@@ -12,14 +12,8 @@ conn.on('connected', function() {
 })
 
 const websiteSchema = new mongoose.Schema({
-  original_url: {
-    type: String,
-    required: true
-  },
-  short_url: {
-    type: Number,
-    required: true
-  }
+  original_url: String,
+  short_url: Number
 })
 
 let Website = mongoose.model('Website', websiteSchema);
@@ -76,8 +70,8 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:short_url', function(req, res) { 
-  Website.findOne({short_url: req.params.short_url}).then((data) => {
+app.get('/api/shorturl/:shorturl', function(req, res) { 
+  Website.findOne({short_url: req.params.shorturl}).then((data) => {
     console.log('working')
     res.redirect(data.original_url)
   })
