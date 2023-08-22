@@ -13,7 +13,7 @@ conn.on('connected', function() {
 
 const websiteSchema = new mongoose.Schema({
   original_url: String,
-  short_url: Number
+  short_url: String
 })
 
 let Website = mongoose.model('Website', websiteSchema);
@@ -77,9 +77,9 @@ app.post('/api/shorturl', function(req, res) {
 })
 
 app.get('/api/shorturl/:shorturl?', function(req, res) {
-  if (req.params.shorturl != undefined && !isNaN(Number(req.params.shorturl))) {
-    var short_url = Number(req.params.shorturl)
-    Website.findOne({short_url: short_url}).then((data) => {
+  if (req.params.shorturl != undefined) {
+    var short_url = req.params.shorturl
+    await Website.findOne({short_url: short_url}).then((data) => {
       if (data == null) {
         return res.json({"error":"No short URL found for the given input"})
       }
