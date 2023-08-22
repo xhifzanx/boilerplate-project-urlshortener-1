@@ -56,7 +56,7 @@ app.post('/api/shorturl', function(req, res) {
       console.log(data == null )
       if (data == null) {
         Website.find().then((data) => {
-          var short_url = data.length + 1
+          var short_url = String(data.length + 1)
           var website = new Website({ original_url: url, short_url: short_url })
           website.save().then((data) => {
             res.json({ original_url: url, short_url: short_url })
