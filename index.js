@@ -76,16 +76,19 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:shorturl', function(req, res) {
-  var short_url = Number(req.params.shorturl)
-  Website.findOne({short_url: short_url}).then((data) => {
-    if (data == null) {
-      return res.json({"error":"No short URL found for the given input"})
-    }
-    res.redirect(data.original_url)
-  }).catch(error => {
-    console.error('Error:', error);
-  });
+app.get('/api/shorturl/:shorturl?', function(req, res) {
+  if (req.params.shorturl.length > 0) {
+    var short_url = Number(req.params.shorturl)
+    Website.findOne({short_url: short_url}).then((data) => {
+      if (data == null) {
+        return res.json({"error":"No short URL found for the given input"})
+      }
+      res.redirect(data.original_url)
+    }).catch(error => {
+      console.error('Error:', error);
+    });
+  }
+
 })
 
 app.listen(port, function() {
