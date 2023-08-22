@@ -47,15 +47,15 @@ app.post('/api/shorturl', function(req, res) {
   } else {
     return res.status(500).json({ error: 'invalid url' })
   }
-  dns.lookup(u, function(err, data) {
+  dns.lookup(u, async function(err, data) {
     if (err) {
       return res.status(500).json({ error: 'invalid url' })
     }
    
-    Website.findOne({original_url: url}).then((data) => {
+    await Website.findOne({original_url: url}).then(async (data) => {
       console.log(data == null )
       if (data == null) {
-        Website.find().then((data) => {
+        await Website.find().then((data) => {
           var short_url = String(data.length + 1)
           var website = new Website({ original_url: url, short_url: short_url })
           website.save().then((data) => {
@@ -76,7 +76,7 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:shorturl?', function(req, res) {
+app.get('/api/shorturl/:shorturl?',async function(req, res) {
   if (req.params.shorturl != undefined) {
     var short_url = req.params.shorturl
     await Website.findOne({short_url: short_url}).then((data) => {
