@@ -76,8 +76,9 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:shorturl', function(req, res) { 
-  Website.findOne({short_url: req.params.shorturl}).then((data) => {
+app.get('/api/shorturl/:shorturl', function(req, res) {
+  var short_url = Number(req.params.shorturl)
+  Website.findOne({short_url: short_url}).then((data) => {
     if (data == null) {
       return res.json({"error":"No short URL found for the given input"})
     }
