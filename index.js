@@ -39,9 +39,6 @@ app.get('/api/hello', function(req, res) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  res.status(404).send('Not Found');
-});
 
 app.post('/api/shorturl', function(req, res) {
   var url = req.body.url;
