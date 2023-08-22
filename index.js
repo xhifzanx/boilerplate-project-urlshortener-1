@@ -60,12 +60,18 @@ app.post('/api/shorturl', function(req, res) {
           var website = new Website({ original_url: url, short_url: short_url })
           website.save().then((data) => {
             res.json({ original_url: url, short_url: short_url })
-          })
-        })
+          }).catch(error => {
+            console.error('Error:', error);
+          });
+        }).catch(error => {
+          console.error('Error:', error);
+        });
       } else {
         res.json({original_url: data.original_url, short_url: data.short_url})
       }
-    })
+    }).catch(error => {
+      console.error('Error:', error);
+    });
 
   })
 })
@@ -74,7 +80,9 @@ app.get('/api/shorturl/:shorturl', function(req, res) {
   Website.findOne({short_url: req.params.shorturl}).then((data) => {
     console.log('working')
     res.redirect(data.original_url)
-  })
+  }).catch(error => {
+    console.error('Error:', error);
+  });
 })
 
 app.listen(port, function() {
