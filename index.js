@@ -77,7 +77,7 @@ app.post('/api/shorturl', function(req, res) {
 })
 
 app.get('/api/shorturl/:shorturl?', function(req, res) {
-  if (req.params.shorturl.length > 0 && isNaN(Number(req.params.shorturl))) {
+  if (req.params.shorturl.length > 0 && !isNaN(req.params.shorturl)) {
     var short_url = Number(req.params.shorturl)
     Website.findOne({short_url: short_url}).then((data) => {
       if (data == null) {
