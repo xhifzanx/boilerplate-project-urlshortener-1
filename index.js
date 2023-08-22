@@ -51,21 +51,35 @@ app.post('/api/shorturl', function(req, res) {
   if (url.includes('https') || url.includes('http')) {
     var u = url.split('/')[2]
   } else {
-    var u = url
+    return res.json({ error: 'invalid url' })
   }
   dns.lookup(u, function(err, data) {
     if (err) {
       return res.json({ error: 'invalid url' })
     }
-
-    Website.find().then((data) => {
-      var short_url = data.length + 1
-      var website = new Website({ original_url: url, short_url: short_url })
-      website.save().then((data) => {
-        res.json({ original_url: url, short_url: short_url })
-      })
+   
+    Website.findOne({original_url: url}).then((data) => {
+      console.log(data == null )
+      if (data == null) {
+        Website.find().then((data) => {
+          var short_url = data.length + 1
+          var website = new Website({ original_url: url, short_url: short_url })
+          website.save().then((data) => {
+            res.json({ original_url: url, short_url: short_url })
+          })
+        })
+      } else {
+        res.json({original_url: data.original_url, short_url: data.short_url})
+      }
     })
 
+  })
+})
+
+app.get('/api/shorturl/:short_url', function(req, res) { 
+  Website.findOne({short_url: req.params.short_url}).then((data) => {
+    console.log('working')
+    res.redirect(data.original_url)
   })
 })
 
