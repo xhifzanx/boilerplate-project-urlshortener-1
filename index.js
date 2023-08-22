@@ -45,11 +45,11 @@ app.post('/api/shorturl', function(req, res) {
   if (url.includes('https') || url.includes('http')) {
     var u = url.split('/')[2]
   } else {
-    return res.status(500).json({ error: 'invalid url' })
+    return res.json({ error: 'invalid url' })
   }
   dns.lookup(u, async function(err, data) {
     if (err) {
-      return res.status(500).json({ error: 'invalid url' })
+      return res.json({ error: 'invalid url' })
     }
    
     await Website.findOne({original_url: url}).then(async (data) => {
@@ -77,18 +77,23 @@ app.post('/api/shorturl', function(req, res) {
 })
 
 app.get('/api/shorturl/:shorturl?',async function(req, res) {
-  if (req.params.shorturl != undefined) {
-    var short_url = req.params.shorturl
-    await Website.findOne({short_url: short_url}).then((data) => {
-      if (data == null) {
-        return res.json({"error":"No short URL found for the given input"})
-      }
-      res.redirect(data.original_url)
-    }).catch(error => {
-      console.error('Error:', error);
-    });
+  var short_url = req.params.shorturl
+  if (short_url != undefined) {
+    if (!isNaN(Number(short_url))) {
+      await Website.findOne({short_url: short_url}).then((data) => {
+        if (data == null) {
+          return res.json({"error":"No short URL found for the given input"})
+        }
+        res.redirect(data.original_url)
+      }).catch(error => {
+        console.error('Error:', error);
+      });
+    } else {
+      return res.json({"error":"Wrong format"})
+    }
+
   } else {
-    return res.status(500).json({"error":"Wrong format"})
+    return res.status(404).json('No URL found')
   }
 
 })
