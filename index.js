@@ -1,113 +1,107 @@
-'use strict';
-
-var express = require('express');
-var MongoClient = require("mongodb").MongoClient;
-var ObjectId = require("mongodb").ObjectId;
-var mongoose = require('mongoose');
-var shortId = require('shortid');
-var bodyParser = require('body-parser');
-var validUrl = require('valid-url');
 require('dotenv').config();
-var cors = require('cors');
-var app = express();
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const dns = require('dns')
+const mongoose = require('mongoose')
+mongoose.connect(process.env['MONGO_URI'], { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Basic Configuration 
-var port = process.env.PORT || 3000;
-
-app.use(bodyParser.urlencoded({
-  extended: false
-}))
-app.use(cors());
-app.use(express.json());
-
-const uri = process.env.MONGO_URI;
-
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
-});
-
-const connection = mongoose.connection;
-
-connection.once('open', () => {
-  console.log("MongoDB database connection established successfully");
+const conn = mongoose.connection
+conn.on('connected', function() {
+  console.log("mongoose connected")
 })
 
-
-app.use('/public', express.static(process.cwd() + '/public'));
-app.get('/', function (req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
-});
-
-//Create Schema
-const Schema = mongoose.Schema;
-const urlSchema = new Schema({
+const websiteSchema = new mongoose.Schema({
   original_url: String,
   short_url: String
 })
-const URL = mongoose.model("URL", urlSchema);
+
+let Website = mongoose.model('Website', websiteSchema);
 
 
 
+// Basic Configuration
+const port = process.env.PORT || 3000;
 
-app.post('/api/shorturl/new', async function (req, res) {
+app.use(cors());
 
-  const url = req.body.url_input
-  const urlCode = shortId.generate()
+app.use('/public', express.static(`${process.cwd()}/public`));
 
-  // check if the url is valid or not
-  if (!validUrl.isWebUri(url)) {
-    res.status(401).json({
-      error: 'invalid URL'
-    })
+app.get('/', function(req, res) {
+  res.sendFile(process.cwd() + '/views/index.html');
+});
+
+// Your first API endpoint
+app.get('/api/hello', function(req, res) {
+  res.json({ greeting: 'hello API' });
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+app.post('/api/shorturl', function(req, res) {
+  var url = req.body.url;
+  if (url.includes('https') || url.includes('http')) {
+    var u = url.split('/')[2]
   } else {
-    try {
-      // check if its already in the database
-      let findOne = await URL.findOne({
-        original_url: url
-      })
-      if (findOne) {
-        res.json({
-          original_url: findOne.original_url,
-          short_url: findOne.short_url
-        })
+    return res.json({ error: 'invalid url' })
+  }
+  dns.lookup(u, async function(err, data) {
+    if (err) {
+      return res.json({ error: 'invalid url' })
+    }
+   
+    await Website.findOne({original_url: url}).then(async (webiste) => {
+      if (webiste == null) {
+        await Website.find().then((result) => {
+          var short_url = String(result.length + 1)
+          var website = new Website({ original_url: url, short_url: short_url })
+          website.save().then((data) => {
+            console.log('created ' + data)
+            res.json({ original_url: url, short_url: Number(short_url) })
+          }).catch(error => {
+            console.error('Error:', error);
+          });
+        }).catch(error => {
+          console.error('Error:', error);
+        });
       } else {
-        // if its not exist yet then create new one and response with the result
-        findOne = new URL({
-          original_url: url,
-          short_url: urlCode
-        })
-        await findOne.save()
-        res.json({
-          original_url: findOne.original_url,
-          short_url: findOne.short_url
-        })
+        console.log('found ' + webiste)
+        res.json({ original_url: webiste.original_url, short_url: Number(webiste.short_url)})
       }
-    } catch (err) {
-      console.error(err)
-      res.status(500).json('Server erorr...')
-    }
-  }
+    }).catch(error => {
+      console.error('Error:', error);
+    });
+
+  })
 })
 
-
-app.get('/api/shorturl/:short_url?', async function (req, res) {
-  try {
-    const urlParams = await URL.findOne({
-      short_url: req.params.short_url
-    })
-    if (urlParams) {
-      return res.redirect(urlParams.original_url)
+app.get('/api/shorturl/:short_url?',async function(req, res) {
+  var short_url = req.params.short_url
+  if (short_url != undefined) {
+    if (!isNaN(Number(short_url))) {
+      console.log('found short_url')
+      await Website.findOne({short_url: short_url}).then((data) => {
+        if (data == null) {
+          return res.json({"error":"No short URL found for the given input"})
+        }
+        res.redirect(data.original_url)
+      }).catch(error => {
+        console.error('Error:', error);
+      });
     } else {
-      return res.status(404).json('No URL found')
+      console.log(req.params)
+      console.log('wrong format ' + req)
+      return res.json({"error":"Wrong format"})
     }
-  } catch (err) {
-    console.log(err)
-    res.status(500).json('Server error')
+
+  } else {
+    return res.status(404).json('No URL found')
   }
+
 })
 
-app.listen(port, () => {
-  console.log(`Server is running on port : ${port}`);
-})
+app.listen(port, function() {
+  console.log(`Listening on port ${port}`);
+});
