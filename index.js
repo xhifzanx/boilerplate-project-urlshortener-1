@@ -77,7 +77,7 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:short_url?',async function(req, res) {
+app.get('/api/shorturl/:short_url',async function(req, res) {
   console.log(req.params)
   console.log(req.body)
   console.log(req.headers)
