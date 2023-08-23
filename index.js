@@ -83,7 +83,7 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
   console.log(req.headers)
 
   var short_url = req.params.short_url
-  if (short_url != undefined || short_url != 'undefined') {
+  if (short_url !== undefined && String(short_url) != 'undefined') {
     if (!isNaN(Number(short_url))) {
       console.log('found short_url')
       await Website.findOne({short_url: short_url}).then((data) => {
