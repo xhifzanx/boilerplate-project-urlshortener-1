@@ -40,7 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.post('/api/shorturl/new', function(req, res) {
+app.post('/api/shorturl', function(req, res) {
   var url = req.body.url;
   if (url.includes('https') || url.includes('http')) {
     var u = url.split('/')[2]
@@ -77,29 +77,20 @@ app.post('/api/shorturl/new', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:short_url?',async function(req, res) {
-  var short_url = req.params.short_url
-  if (short_url != undefined) {
-    if (!isNaN(Number(short_url))) {
-      console.log('found short_url')
-      await Website.findOne({short_url: short_url}).then((data) => {
-        if (data == null) {
-          return res.json({"error":"No short URL found for the given input"})
-        }
-        res.redirect(data.original_url)
-      }).catch(error => {
-        console.error('Error:', error);
-      });
+app.get('/api/shorturl/:short_url?', async function (req, res) {
+  try {
+    const urlParams = await Website.findOne({
+      short_url: req.params.short_url
+    })
+    if (urlParams) {
+      return res.redirect(urlParams.original_url)
     } else {
-      console.log(req.params)
-      console.log('wrong format ' + req)
-      return res.json({"error":"Wrong format"})
+      return res.status(404).json('No URL found')
     }
-
-  } else {
-    return res.status(404).json('No URL found')
+  } catch (err) {
+    console.log(err)
+    res.status(500).json('Server error')
   }
-
 })
 
 app.listen(port, function() {
