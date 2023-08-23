@@ -92,11 +92,11 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
       });
     } else {
       console.log(req.params)
-      return res.json({"error":"Wrong format"})
+      return res.status(404).json({"error":"Wrong format"})
     }
 
   } else {
-    return res.status(404).json('No URL found')
+    return res.status(404).send('Not Found')
   }
 
 })
