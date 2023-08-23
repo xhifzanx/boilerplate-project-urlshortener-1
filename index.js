@@ -78,27 +78,7 @@ app.post('/api/shorturl', function(req, res) {
 })
 
 app.get('/api/shorturl/:short_url?',async function(req, res) {
-  var short_url = req.params.short_url
-  if (short_url != undefined) {
-    if (!isNaN(Number(short_url))) {
-      console.log('found short_url')
-      await Website.findOne({short_url: short_url}).then((data) => {
-        if (data == null) {
-          return res.json({"error":"No short URL found for the given input"})
-        }
-        res.redirect(data.original_url)
-      }).catch(error => {
-        console.error('Error:', error);
-      });
-    } else {
-      console.log(req.params)
-      console.log('wrong format ' + req)
-      return res.json({"error":"Wrong format"})
-    }
-
-  } else {
-    return res.status(404).json('No URL found')
-  }
+ console.log('this one')
 
 })
 
