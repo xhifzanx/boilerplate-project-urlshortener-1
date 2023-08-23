@@ -52,13 +52,13 @@ app.post('/api/shorturl', function(req, res) {
       return res.json({ error: 'invalid url' })
     }
    
-    await Website.findOne({original_url: url}).then(async (data) => {
-      console.log(data == null )
-      if (data == null) {
-        await Website.find().then((data) => {
-          var short_url = String(data.length + 1)
+    await Website.findOne({original_url: url}).then(async (webiste) => {
+      if (webiste == null) {
+        await Website.find().then((result) => {
+          var short_url = String(result.length + 1)
           var website = new Website({ original_url: url, short_url: short_url })
           website.save().then((data) => {
+            console.log('created ' + data)
             res.json({ original_url: url, short_url: Number(short_url) })
           }).catch(error => {
             console.error('Error:', error);
@@ -67,7 +67,8 @@ app.post('/api/shorturl', function(req, res) {
           console.error('Error:', error);
         });
       } else {
-        res.json({ original_url: data.original_url, short_url: Number(data.short_url)})
+        console.log('found ' + webiste)
+        res.json({ original_url: webiste.original_url, short_url: Number(webiste.short_url)})
       }
     }).catch(error => {
       console.error('Error:', error);
@@ -80,6 +81,7 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
   var short_url = req.params.short_url
   if (short_url != undefined) {
     if (!isNaN(Number(short_url))) {
+      console.log('found short_url')
       await Website.findOne({short_url: short_url}).then((data) => {
         if (data == null) {
           return res.json({"error":"No short URL found for the given input"})
@@ -89,6 +91,7 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
         console.error('Error:', error);
       });
     } else {
+      console.log('wrong format ' + short_url)
       return res.json({"error":"Wrong format"})
     }
 
