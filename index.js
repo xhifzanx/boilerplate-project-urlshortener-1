@@ -40,7 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.post('/api/shorturl', function(req, res) {
+app.post('/api/shorturl/new', function(req, res) {
   var url = req.body.url;
   if (url.includes('https') || url.includes('http')) {
     var u = url.split('/')[2]
