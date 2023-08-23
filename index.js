@@ -67,7 +67,7 @@ app.post('/api/shorturl', function(req, res) {
           console.error('Error:', error);
         });
       } else {
-        res.json({original_url: data.original_url, short_url: Number(data.short_url)})
+        res.json({ original_url: data.original_url, short_url: Number(data.short_url)})
       }
     }).catch(error => {
       console.error('Error:', error);
@@ -76,8 +76,8 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:shorturl?',async function(req, res) {
-  var short_url = req.params.shorturl
+app.get('/api/shorturl/:short_url?',async function(req, res) {
+  var short_url = req.params.short_url
   if (short_url != undefined) {
     if (!isNaN(Number(short_url))) {
       await Website.findOne({short_url: short_url}).then((data) => {
