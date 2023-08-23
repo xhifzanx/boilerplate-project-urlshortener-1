@@ -77,11 +77,7 @@ app.post('/api/shorturl', function(req, res) {
   })
 })
 
-app.get('/api/shorturl/:short_url',async function(req, res) {
-  console.log(req.params)
-  console.log(req.body)
-  console.log(req.headers)
-
+app.get('/api/shorturl/:short_url?',async function(req, res) {
   var short_url = req.params.short_url
   if (short_url !== undefined && String(short_url) != 'undefined') {
     if (!isNaN(Number(short_url))) {
