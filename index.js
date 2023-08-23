@@ -91,7 +91,7 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
         console.error('Error:', error);
       });
     } else {
-      console.log('wrong format ' + short_url)
+      console.log('wrong format ' + req.params)
       return res.json({"error":"Wrong format"})
     }
 
