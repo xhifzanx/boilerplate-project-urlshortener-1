@@ -79,6 +79,7 @@ app.post('/api/shorturl', function(req, res) {
 
 app.get('/api/shorturl/:short_url?',async function(req, res) {
   var short_url = req.params.short_url
+  console.log(req.params)
   if (short_url !== undefined) {
     if (!isNaN(Number(short_url))) {
       console.log('found short_url')
@@ -91,7 +92,6 @@ app.get('/api/shorturl/:short_url?',async function(req, res) {
         console.error('Error:', error);
       });
     } else {
-      console.log(req.params)
       return res.status(404).json({"error":"Wrong format"})
     }
 
